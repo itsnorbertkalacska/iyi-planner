@@ -1,0 +1,12 @@
+{
+  "name": "InstaPlanner",
+  "displayName": "InstaPlanner",
+  "expo": {
+    "name": "InstaPlanner",
+    "slug": "InstaPlanner",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
