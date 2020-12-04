@@ -1,18 +1,42 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
-import Item from './src/home/item';
+import * as T from './src/interface/post/type';
+// import * as Data from './src/interface/post/data';
+import Item from './src/app/home/item';
+import { Loader } from './src/common';
+
+const MAX_POSTS = 18;
 
 export default function App() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [posts, setPosts] = useState<T.Post[]>([]);
 
-  const items = [];
-  for (let i = 1; i <= 30; i++) {
-    items.push({
-      id: i,
-      title: `Title #${i}`,
-    });
-  }
+  // useEffect(() => {
+  //   Data.list().then((result) => {
+  //     setPosts(result)
+  //   });
+  // }, []);
+
+  useEffect(() => {
+    const placeholders: T.Post[] = [];
+
+    for (let i = 1; i <= MAX_POSTS; i++) {
+      placeholders.push({
+        id: i,
+      });
+    }
+
+    setPosts(placeholders);
+  }, []);
 
   const handleSelection = (itemId: number) => {
     if (itemId === selectedId) {
@@ -22,27 +46,71 @@ export default function App() {
     }
   };
 
+  const openImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync();
+
+    if (pickerResult.cancelled) {
+      return;
+    }
+
+    setPosts(
+      posts.map((item) => {
+        if (item.id !== selectedId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          image: {
+            localUri: pickerResult.uri,
+          },
+        };
+      })
+    );
+    setSelectedId(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Insta Planner</Text>
       </View>
-      <View style={styles.listContainer}>
+      {posts.length ? (
         <FlatList
-          data={items}
+          data={posts}
           keyExtractor={(item) => `item${item.id}`}
           renderItem={({ item }) => (
             <Item
               key={`item${item.id}`}
               onPress={() => handleSelection(item.id)}
-              title={item.title}
+              title={`Title #${item.id}`}
               selected={selectedId === item.id}
+              image={item.image?.localUri}
             />
           )}
           numColumns={3}
-          extraData={selectedId}
         />
-      </View>
+      ) : (
+        <Loader.Page />
+      )}
+
+      {selectedId && (
+        <View style={styles.floatingMenu}>
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={openImagePicker}
+          >
+            <Text style={{ color: 'white' }}>Upload Photo</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -55,16 +123,21 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
+    padding: 10,
   },
   title: {
     fontSize: 22,
   },
-  listContainer: {
-    flex: 11,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  floatingMenu: {
+    position: 'absolute',
+    bottom: 75,
+    right: 25,
+  },
+  floatingButton: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    padding: 12,
   },
 });

@@ -6,24 +6,30 @@ import {
   Dimensions,
   TouchableOpacity,
   GestureResponderEvent,
+  Image,
 } from 'react-native';
 
 interface Props {
   onPress: (event: GestureResponderEvent) => void;
   title: string;
+  image?: string;
   selected?: boolean;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-const Item = ({ onPress, title, selected }: Props): JSX.Element => {
+const Item = ({ onPress, title, image, selected }: Props): JSX.Element => {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles.item, selected ? styles.selected : undefined]}
     >
       <View style={styles.content}>
-        <Text>{title}</Text>
+        {image ? (
+          <Image style={styles.image} source={{ uri: image }} />
+        ) : (
+          <Text>{title}</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -44,6 +50,13 @@ const styles = StyleSheet.create({
   },
   selected: {
     backgroundColor: '#cccccc',
+  },
+  image: {
+    borderWidth: 1,
+    borderColor: '#ffffff',
+    height: width / 3,
+    resizeMode: 'cover',
+    width: width / 3,
   },
 });
 
