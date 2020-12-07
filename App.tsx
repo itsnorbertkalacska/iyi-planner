@@ -8,25 +8,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as T from './src/interface/post/type';
-// import * as Data from './src/interface/post/data';
 import Item from './src/app/home/item';
 import { Loader } from './src/common';
 
 const MAX_POSTS = 18;
 
 export default function App() {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedPost, setSelectedPost] = useState<T.Post | null>(null);
   const [posts, setPosts] = useState<T.Post[]>([]);
 
-  // useEffect(() => {
-  //   Data.list().then((result) => {
-  //     setPosts(result)
-  //   });
-  // }, []);
-
-  useEffect(() => {
+  const getPlaceholders = (): T.Post[] => {
     const placeholders: T.Post[] = [];
 
     for (let i = 1; i <= MAX_POSTS; i++) {
@@ -35,14 +29,33 @@ export default function App() {
       });
     }
 
-    setPosts(placeholders);
-  }, []);
+    return placeholders;
+  };
 
-  const handleSelection = (itemId: number) => {
-    if (itemId === selectedId) {
-      setSelectedId(null);
+  const getPostsFromStore = async () => {
+    try {
+      const posts = await AsyncStorage.getItem('posts');
+      return posts !== null ? JSON.parse(posts) : null;
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  useEffect(() => {
+    getPostsFromStore().then((postsFromStore) => {
+      if (postsFromStore !== null) {
+        setPosts(postsFromStore);
+      } else {
+        setPosts(getPlaceholders());
+      }
+    });
+  }, [setPosts, getPostsFromStore, getPlaceholders]);
+
+  const handleSelection = (item: T.Post) => {
+    if (item.id === selectedPost?.id) {
+      setSelectedPost(null);
     } else {
-      setSelectedId(itemId);
+      setSelectedPost(item);
     }
   };
 
@@ -60,28 +73,49 @@ export default function App() {
       return;
     }
 
-    setPosts(
-      posts.map((item) => {
-        if (item.id !== selectedId) {
-          return item;
-        }
+    const newPosts = posts.map((item) => {
+      if (item.id !== selectedPost?.id) {
+        return item;
+      }
 
-        return {
-          ...item,
-          image: {
-            localUri: pickerResult.uri,
-          },
-        };
-      })
-    );
-    setSelectedId(null);
+      return {
+        ...item,
+        image: {
+          localUri: pickerResult.uri,
+        },
+      };
+    });
+
+    try {
+      await AsyncStorage.setItem('posts', JSON.stringify(newPosts));
+    } catch (err) {}
+
+    setPosts(newPosts);
+    setSelectedPost(null);
+  };
+
+  const removePhoto = async () => {
+    const newPosts = posts.map((item) => {
+      if (item.id !== selectedPost?.id) {
+        return item;
+      }
+
+      return {
+        ...item,
+        image: undefined,
+      };
+    });
+
+    try {
+      await AsyncStorage.setItem('posts', JSON.stringify(newPosts));
+    } catch (err) {}
+
+    setPosts(newPosts);
+    setSelectedPost(null);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Insta Planner</Text>
-      </View>
       {posts.length ? (
         <FlatList
           data={posts}
@@ -89,9 +123,9 @@ export default function App() {
           renderItem={({ item }) => (
             <Item
               key={`item${item.id}`}
-              onPress={() => handleSelection(item.id)}
+              onPress={() => handleSelection(item)}
               title={`Title #${item.id}`}
-              selected={selectedId === item.id}
+              selected={selectedPost?.id === item.id}
               image={item.image?.localUri}
             />
           )}
@@ -101,14 +135,23 @@ export default function App() {
         <Loader.Page />
       )}
 
-      {selectedId && (
+      {selectedPost && (
         <View style={styles.floatingMenu}>
-          <TouchableOpacity
-            style={styles.floatingButton}
-            onPress={openImagePicker}
-          >
-            <Text style={{ color: 'white' }}>Upload Photo</Text>
-          </TouchableOpacity>
+          {selectedPost.image ? (
+            <TouchableOpacity
+              style={styles.floatingButton}
+              onPress={removePhoto}
+            >
+              <Text style={{ color: 'white' }}>Remove Photo</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.floatingButton}
+              onPress={openImagePicker}
+            >
+              <Text style={{ color: 'white' }}>Upload Photo</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </SafeAreaView>
@@ -121,18 +164,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#fff',
   },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    padding: 10,
-  },
-  title: {
-    fontSize: 22,
-  },
   floatingMenu: {
     position: 'absolute',
-    bottom: 75,
+    bottom: 50,
     right: 25,
   },
   floatingButton: {

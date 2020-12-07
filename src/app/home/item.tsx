@@ -20,17 +20,17 @@ const { width } = Dimensions.get('window');
 
 const Item = ({ onPress, title, image, selected }: Props): JSX.Element => {
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles.item, selected ? styles.selected : undefined]}
-    >
-      <View style={styles.content}>
-        {image ? (
-          <Image style={styles.image} source={{ uri: image }} />
-        ) : (
+    <TouchableOpacity onPress={onPress} style={styles.item}>
+      {image ? (
+        <Image
+          style={[styles.image, selected ? styles.selectedImage : undefined]}
+          source={{ uri: image }}
+        />
+      ) : (
+        <View style={[styles.content, selected ? styles.selected : undefined]}>
           <Text>{title}</Text>
-        )}
-      </View>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -49,7 +49,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selected: {
-    backgroundColor: '#cccccc',
+    backgroundColor: '#fcfcfc',
+    borderColor: '#fcfcfc',
+    borderWidth: 3,
   },
   image: {
     borderWidth: 1,
@@ -57,6 +59,9 @@ const styles = StyleSheet.create({
     height: width / 3,
     resizeMode: 'cover',
     width: width / 3,
+  },
+  selectedImage: {
+    opacity: 0.5,
   },
 });
 
