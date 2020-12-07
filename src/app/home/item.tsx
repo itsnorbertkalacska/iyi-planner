@@ -12,13 +12,24 @@ import {
 interface Props {
   onPress: (event: GestureResponderEvent) => void;
   title: string;
+  disabled?: boolean;
   image?: string;
   selected?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 
-const Item = ({ onPress, title, image, selected }: Props): JSX.Element => {
+const Item = ({
+  onPress,
+  title,
+  disabled,
+  image,
+  selected,
+}: Props): JSX.Element => {
+  if (disabled) {
+    return <View style={{ width: width / 3, height: width / 3 }}></View>;
+  }
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.item}>
       {image ? (

@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as T from './src/interface/post/type';
-import Item from './src/app/home/item';
+import { FloatingMenu, Item } from './src/app/home';
 import { Loader } from './src/common';
 
 const MAX_POSTS = 18;
@@ -19,6 +12,7 @@ const MAX_POSTS = 18;
 export default function App() {
   const [selectedPost, setSelectedPost] = useState<T.Post | null>(null);
   const [posts, setPosts] = useState<T.Post[]>([]);
+  const [slide, setSlide] = useState<number>(0);
 
   const getPlaceholders = (): T.Post[] => {
     const placeholders: T.Post[] = [];
@@ -114,11 +108,30 @@ export default function App() {
     setSelectedPost(null);
   };
 
+  const slidePhotos = () => {
+    if (slide >= 2) {
+      setSlide(0);
+    } else {
+      setSlide(slide + 1);
+    }
+  };
+
+  const getSlideItems = (): T.Post[] => {
+    const placeholders: T.Post[] = [];
+    for (let i = 0; i < slide; i++) {
+      placeholders.push({
+        id: -1 * (i - 1),
+        disabled: true,
+      });
+    }
+    return placeholders;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {posts.length ? (
         <FlatList
-          data={posts}
+          data={[...getSlideItems(), ...posts]}
           keyExtractor={(item) => `item${item.id}`}
           renderItem={({ item }) => (
             <Item
@@ -126,6 +139,7 @@ export default function App() {
               onPress={() => handleSelection(item)}
               title={`Title #${item.id}`}
               selected={selectedPost?.id === item.id}
+              disabled={item.disabled}
               image={item.image?.localUri}
             />
           )}
@@ -136,23 +150,12 @@ export default function App() {
       )}
 
       {selectedPost && (
-        <View style={styles.floatingMenu}>
-          {selectedPost.image ? (
-            <TouchableOpacity
-              style={styles.floatingButton}
-              onPress={removePhoto}
-            >
-              <Text style={{ color: 'white' }}>Remove Photo</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.floatingButton}
-              onPress={openImagePicker}
-            >
-              <Text style={{ color: 'white' }}>Upload Photo</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <FloatingMenu
+          onRemovePhoto={removePhoto}
+          onSlide={slidePhotos}
+          onUploadPhoto={openImagePicker}
+          hasImage={selectedPost.image ? true : false}
+        />
       )}
     </SafeAreaView>
   );
@@ -163,15 +166,5 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: '#fff',
-  },
-  floatingMenu: {
-    position: 'absolute',
-    bottom: 50,
-    right: 25,
-  },
-  floatingButton: {
-    backgroundColor: 'blue',
-    borderRadius: 10,
-    padding: 12,
   },
 });
