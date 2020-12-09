@@ -8,6 +8,7 @@ interface Props {
   onSlide: () => void;
   onUploadPhoto: () => void;
   selectedPost: T.Post | null;
+  onGoToDetails: () => void;
 }
 
 const FloatingMenu = ({
@@ -15,6 +16,7 @@ const FloatingMenu = ({
   onSlide,
   onUploadPhoto,
   selectedPost,
+  onGoToDetails,
 }: Props): JSX.Element => {
   return (
     <View style={styles.floatingMenu}>
@@ -29,13 +31,22 @@ const FloatingMenu = ({
       {selectedPost && (
         <>
           {selectedPost?.image ? (
-            <TouchableOpacity
-              style={styles.floatingButton}
-              onPress={onRemovePhoto}
-              activeOpacity={0.9}
-            >
-              <Text style={styles.floatingButtonText}>Remove Photo</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity
+                style={styles.floatingButton}
+                onPress={onRemovePhoto}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.floatingButtonText}>Remove Photo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.floatingButton}
+                onPress={onGoToDetails}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.floatingButtonText}>View</Text>
+              </TouchableOpacity>
+            </>
           ) : (
             <TouchableOpacity
               style={styles.floatingButton}
