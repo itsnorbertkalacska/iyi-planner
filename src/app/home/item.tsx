@@ -18,6 +18,7 @@ interface Props {
 }
 
 const { width } = Dimensions.get('window');
+const childrenWidth = width / 3 - 1;
 
 const Item = ({
   onPress,
@@ -31,7 +32,8 @@ const Item = ({
   }
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.item}>
+    <View style={styles.item}>
+      {/* <TouchableOpacity onPress={onPress} style={styles.item}> */}
       {image ? (
         <Image
           style={[styles.image, selected ? styles.selectedImage : undefined]}
@@ -42,17 +44,19 @@ const Item = ({
           <Text>{title}</Text>
         </View>
       )}
-    </TouchableOpacity>
+      {/* </TouchableOpacity> */}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   item: {
+    aspectRatio: 1,
     backgroundColor: '#efefef',
     borderWidth: 1,
     borderColor: '#ffffff',
-    height: width / 3,
-    width: width / 3,
+    height: childrenWidth,
+    width: childrenWidth,
   },
   content: {
     alignItems: 'center',
