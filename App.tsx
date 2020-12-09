@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   StyleSheet,
-  Text,
   View,
   SafeAreaView,
-  TouchableOpacity,
   Image,
 } from 'react-native';
 import { AutoDragSortableView } from 'react-native-drag-sort';
@@ -15,29 +13,6 @@ import * as T from './src/interface/post/type';
 import * as Data from './src/interface/post/data';
 import { Loader } from './src/common';
 import { FloatingMenu } from './src/app/home';
-
-interface D {
-  txt: string | number;
-  isHidden?: boolean;
-}
-
-const AUTO_TEST_DATA: D[] = [
-  { txt: 1 },
-  { txt: 2 },
-  { txt: 3 },
-  { txt: 4 },
-  { txt: 5 },
-  { txt: 6 },
-  { txt: 7 },
-  { txt: 8 },
-  { txt: 9 },
-  { txt: 10 },
-  { txt: 11 },
-  { txt: 12 },
-  { txt: 13 },
-  { txt: 14 },
-  { txt: 15 },
-];
 
 const { width } = Dimensions.get('window');
 
@@ -79,9 +54,7 @@ const AutomaticSlidingThreePage = () => {
             source={{ uri: item.image.localUri }}
           />
         ) : (
-          <View style={[styles.content]}>
-            <Text>Title {item.id}</Text>
-          </View>
+          <View style={[styles.content]} />
         )}
       </View>
     );
@@ -163,46 +136,32 @@ const AutomaticSlidingThreePage = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       {posts.length ? (
-        <>
-          <TouchableOpacity
-            onPress={shiftGrid}
-            style={styles.shiftGridButtonContainer}
-            activeOpacity={0.9}
-          >
-            <Text>Grid Shift</Text>
-          </TouchableOpacity>
-
-          <AutoDragSortableView
-            dataSource={[...getShiftItems(), ...posts]}
-            parentWidth={parentWidth}
-            childrenWidth={childrenWidth}
-            marginChildrenBottom={0.5}
-            marginChildrenRight={0.5}
-            marginChildrenLeft={0.5}
-            marginChildrenTop={0.5}
-            childrenHeight={childrenHeight}
-            onDataChange={rearrangePosts}
-            keyExtractor={(item) => `item${item.id}`}
-            renderItem={(item: T.Post) =>
-              renderItem(item, item.id === selectedPost?.id)
-            }
-            onClickItem={(data: T.Post[], item: T.Post) =>
-              handleSelection(item)
-            }
-          />
-        </>
+        <AutoDragSortableView
+          dataSource={[...getShiftItems(), ...posts]}
+          parentWidth={parentWidth}
+          childrenWidth={childrenWidth}
+          marginChildrenBottom={0.5}
+          marginChildrenRight={0.5}
+          marginChildrenLeft={0.5}
+          marginChildrenTop={0.5}
+          childrenHeight={childrenHeight}
+          onDataChange={rearrangePosts}
+          keyExtractor={(item) => `item${item.id}`}
+          renderItem={(item: T.Post) =>
+            renderItem(item, item.id === selectedPost?.id)
+          }
+          onClickItem={(data: T.Post[], item: T.Post) => handleSelection(item)}
+        />
       ) : (
         <Loader.Page />
       )}
 
-      {selectedPost && (
-        <FloatingMenu
-          onRemovePhoto={removePhoto}
-          onSlide={shiftGrid}
-          onUploadPhoto={openImagePicker}
-          hasImage={selectedPost.image ? true : false}
-        />
-      )}
+      <FloatingMenu
+        onRemovePhoto={removePhoto}
+        onSlide={shiftGrid}
+        onUploadPhoto={openImagePicker}
+        selectedPost={selectedPost}
+      />
     </SafeAreaView>
   );
 };
@@ -223,33 +182,6 @@ const styles = StyleSheet.create({
   },
   hiddenItem: {
     backgroundColor: '#fff',
-  },
-  item_text_swipe: {
-    backgroundColor: '#fff',
-    width: 80,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  item_text: {
-    color: '#444',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  shiftGridButtonContainer: {
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#efefef',
-    bottom: 10,
-    paddingBottom: 10,
-    paddingLeft: 15,
-    paddingRight: 15,
-    paddingTop: 10,
-    position: 'absolute',
-    zIndex: 1,
   },
   // later move to item
   selected: {

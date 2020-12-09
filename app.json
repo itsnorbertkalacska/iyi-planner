@@ -5,7 +5,9 @@
     "name": "InstaPlanner",
     "slug": "InstaPlanner",
     "version": "1.0.0",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "description": "A simple insta planner FTW!",
     "experiments": {
       "turboModules": true
