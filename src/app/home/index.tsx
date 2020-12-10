@@ -27,22 +27,34 @@ const Home = ({ navigation }: Props) => {
   const [shifts, setShifts] = useState(0);
 
   useEffect(() => {
-    Data.list().then((postsFromStore) => {
-      setPosts(postsFromStore);
+    const unsubscribe = navigation.addListener('focus', () => {
+      // The screen is focused
+      // Call any action
+      Data.list().then((postsFromStore) => setPosts(postsFromStore));
 
-      Data.listFromInstagram().then((result) => {
-        const newPosts: T.Post[] = result.data.map((r: any) => ({
-          id: Number(r.id),
-          caption: r.caption,
-          image: {
-            localUri: r.media_url,
-          },
-          isFromInstagram: true,
-        }));
+      Data.listFromInstagram()
+        .then((result) => {
+          const newPosts: T.Post[] = result.data.map((r: any) => ({
+            id: Number(r.id),
+            caption: r.caption,
+            image: {
+              localUri: r.media_url,
+            },
+            isFromInstagram: true,
+          }));
 
-        setPosts((data) => [...data, ...newPosts]);
-      });
+          setPosts((data) => [...data, ...newPosts]);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     });
+
+    // just for the sake of testing
+    // Data.clear();
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
   }, []);
 
   const handleSelection = (item: T.Post) => {
