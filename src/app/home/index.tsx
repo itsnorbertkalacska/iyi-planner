@@ -51,7 +51,7 @@ const Home = ({ navigation }: Props) => {
     });
 
     // just for the sake of testing
-    // Data.clear();
+    Data.clear();
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
