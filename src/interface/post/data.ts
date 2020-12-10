@@ -29,7 +29,10 @@ const getPlaceholders = (): T.Post[] => {
 
 export const store = async (newPosts: T.Post[]) => {
   try {
-    await AsyncStorage.setItem('posts', JSON.stringify(newPosts));
+    await AsyncStorage.setItem(
+      'posts',
+      JSON.stringify(newPosts.filter((post) => !post.isFromInstagram))
+    );
   } catch (err) {}
 };
 
