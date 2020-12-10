@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import * as InstagramService from '../instagram/data';
 import * as T from './type';
 
-const MAX_POSTS = 18;
+const MAX_POSTS = 12;
 
 export const list = async (): Promise<T.Post[]> => {
   try {
@@ -30,4 +31,11 @@ export const store = async (newPosts: T.Post[]) => {
   try {
     await AsyncStorage.setItem('posts', JSON.stringify(newPosts));
   } catch (err) {}
+};
+
+export const listFromInstagram = async (): Promise<any> => {
+  const result = await InstagramService.get(
+    '/me/media?fields=id,caption,media_type,media_url'
+  );
+  return result;
 };

@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  Image,
-} from 'react-native';
+import { Dimensions, StyleSheet, SafeAreaView } from 'react-native';
 import { AutoDragSortableView } from 'react-native-drag-sort';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -13,6 +7,7 @@ import * as T from '../../interface/post/type';
 import * as Data from '../../interface/post/data';
 import { Loader } from '../../common';
 import FloatingMenu from './floating-menu';
+import Item from './item';
 
 const { width } = Dimensions.get('window');
 
@@ -34,8 +29,21 @@ const Home = ({ navigation }: Props) => {
   useEffect(() => {
     Data.list().then((postsFromStore) => {
       setPosts(postsFromStore);
+
+      Data.listFromInstagram().then((result) => {
+        const newPosts: T.Post[] = result.data.map((r: any) => ({
+          id: Number(r.id),
+          caption: r.caption,
+          image: {
+            localUri: r.media_url,
+          },
+          isFromInstagram: true,
+        }));
+
+        setPosts((data) => [...data, ...newPosts]);
+      });
     });
-  }, [setPosts]);
+  }, []);
 
   const handleSelection = (item: T.Post) => {
     if (item.id === selectedPost?.id) {
@@ -43,25 +51,6 @@ const Home = ({ navigation }: Props) => {
     } else {
       setSelectedPost(item);
     }
-  };
-
-  const renderItem = (item: T.Post, selected?: boolean) => {
-    if (item.disabled) {
-      return <View style={[styles.item, styles.hiddenItem]} />;
-    }
-
-    return (
-      <View style={[styles.item, selected ? styles.selected : undefined]}>
-        {item.image ? (
-          <Image
-            style={[styles.image, selected ? styles.selectedImage : undefined]}
-            source={{ uri: item.image.localUri }}
-          />
-        ) : (
-          <View style={[styles.content]} />
-        )}
-      </View>
-    );
   };
 
   const openImagePicker = async () => {
@@ -143,8 +132,12 @@ const Home = ({ navigation }: Props) => {
     }
   };
 
+  const goToInstaLogin = () => {
+    navigation.navigate('InstaLogin');
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={styles.container}>
       {posts.length ? (
         <AutoDragSortableView
           dataSource={[...getShiftItems(), ...posts]}
@@ -157,9 +150,9 @@ const Home = ({ navigation }: Props) => {
           childrenHeight={childrenHeight}
           onDataChange={rearrangePosts}
           keyExtractor={(item) => `item${item.id}`}
-          renderItem={(item: T.Post) =>
-            renderItem(item, item.id === selectedPost?.id)
-          }
+          renderItem={(item: T.Post) => (
+            <Item item={item} selected={item.id === selectedPost?.id} />
+          )}
           onClickItem={(data: T.Post[], item: T.Post) => handleSelection(item)}
         />
       ) : (
@@ -172,6 +165,7 @@ const Home = ({ navigation }: Props) => {
         onUploadPhoto={openImagePicker}
         selectedPost={selectedPost}
         onGoToDetails={goToDetails}
+        loginWithYourInsta={goToInstaLogin}
       />
     </SafeAreaView>
   );
@@ -181,39 +175,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#ffffff',
     flex: 1,
-    position: 'relative',
-  },
-  item: {
-    alignItems: 'center',
-    aspectRatio: 1,
-    // backgroundColor: '#f39c12',
-    backgroundColor: '#efefef',
-    justifyContent: 'space-around',
-    width: childrenWidth,
-  },
-  hiddenItem: {
-    backgroundColor: '#fff',
-  },
-  // later move to item
-  selected: {
-    backgroundColor: '#fcfcfc',
-    borderColor: '#fcfcfc',
-    borderWidth: 3,
-  },
-  image: {
-    borderWidth: 1,
-    borderColor: '#ffffff',
-    height: width / 3,
-    resizeMode: 'cover',
-    width: width / 3,
-  },
-  selectedImage: {
-    opacity: 0.5,
-  },
-  content: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
   },
 });
 

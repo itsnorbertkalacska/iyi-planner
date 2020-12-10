@@ -9,6 +9,7 @@ interface Props {
   onUploadPhoto: () => void;
   selectedPost: T.Post | null;
   onGoToDetails: () => void;
+  loginWithYourInsta: () => void;
 }
 
 const FloatingMenu = ({
@@ -17,11 +18,20 @@ const FloatingMenu = ({
   onUploadPhoto,
   selectedPost,
   onGoToDetails,
+  loginWithYourInsta,
 }: Props): JSX.Element => {
   return (
     <View style={styles.floatingMenu}>
       <TouchableOpacity
         style={[styles.floatingButton, { marginLeft: 0 }]}
+        onPress={loginWithYourInsta}
+        activeOpacity={0.9}
+      >
+        <Text style={styles.floatingButtonText}>Go to Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.floatingButton]}
         onPress={onSlide}
         activeOpacity={0.9}
       >
@@ -30,15 +40,18 @@ const FloatingMenu = ({
 
       {selectedPost && (
         <>
-          {selectedPost?.image ? (
+          {selectedPost.image ? (
             <>
-              <TouchableOpacity
-                style={styles.floatingButton}
-                onPress={onRemovePhoto}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.floatingButtonText}>Remove Photo</Text>
-              </TouchableOpacity>
+              {!selectedPost.isFromInstagram && (
+                <TouchableOpacity
+                  style={styles.floatingButton}
+                  onPress={onRemovePhoto}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.floatingButtonText}>Remove Photo</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
                 style={styles.floatingButton}
                 onPress={onGoToDetails}

@@ -7,4 +7,5 @@ export interface Post {
   caption?: string;
   disabled?: boolean;
   image?: Image;
+  isFromInstagram?: boolean;
 }

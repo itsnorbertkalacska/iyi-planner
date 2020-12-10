@@ -1,67 +1,45 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-  GestureResponderEvent,
-  Image,
-} from 'react-native';
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
+
+import * as T from '../../interface/post/type';
 
 interface Props {
-  onPress: (event: GestureResponderEvent) => void;
-  title: string;
-  disabled?: boolean;
-  image?: string;
+  item: T.Post;
   selected?: boolean;
 }
 
 const { width } = Dimensions.get('window');
 const childrenWidth = width / 3 - 1;
 
-const Item = ({
-  onPress,
-  title,
-  disabled,
-  image,
-  selected,
-}: Props): JSX.Element => {
-  if (disabled) {
-    return <View style={{ width: width / 3, height: width / 3 }}></View>;
+const Item = ({ item, selected }: Props) => {
+  if (item.disabled) {
+    return <View style={[styles.item, styles.hiddenItem]} />;
   }
 
   return (
-    <View style={styles.item}>
-      {/* <TouchableOpacity onPress={onPress} style={styles.item}> */}
-      {image ? (
+    <View style={[styles.item, selected ? styles.selected : undefined]}>
+      {item.image ? (
         <Image
           style={[styles.image, selected ? styles.selectedImage : undefined]}
-          source={{ uri: image }}
+          source={{ uri: item.image.localUri }}
         />
       ) : (
-        <View style={[styles.content, selected ? styles.selected : undefined]}>
-          <Text>{title}</Text>
-        </View>
+        <View style={[styles.content]} />
       )}
-      {/* </TouchableOpacity> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   item: {
+    alignItems: 'center',
     aspectRatio: 1,
     backgroundColor: '#efefef',
-    borderWidth: 1,
-    borderColor: '#ffffff',
-    height: childrenWidth,
+    justifyContent: 'space-around',
     width: childrenWidth,
   },
-  content: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
+  hiddenItem: {
+    backgroundColor: '#fff',
   },
   selected: {
     backgroundColor: '#fcfcfc',
@@ -77,6 +55,11 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     opacity: 0.5,
+  },
+  content: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
 });
 
